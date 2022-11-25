@@ -13,6 +13,29 @@ import XLSX from 'xlsx'
 
 let _vxetable: typeof VXETable
 
+
+function getCellLabel (column: ColumnConfig, cellValue: any) {
+  if (cellValue) {
+    switch (column.cellType) {
+      case 'string':
+        return XEUtils.toValueString(cellValue)
+      case 'number':
+        if (!isNaN(cellValue)) {
+          return Number(cellValue)
+        }
+        break
+      default:
+        if (cellValue.length < 12 && !isNaN(cellValue)) {
+          return Number(cellValue)
+        }
+        break
+    }
+  }
+  return cellValue
+}
+
+
+
 function getFooterCellValue ($table: Table, opts: ExportOptons, rows: any[], column: ColumnConfig) {
   var cellValue = XEUtils.toString(rows[$table.$getColumnIndex(column)])
   return cellValue
@@ -30,12 +53,23 @@ function exportXLSX (params: InterceptorExportParams) {
   const { sheetName, type, isHeader, isFooter, original, message, footerFilterMethod } = options
   const colHead: { [key: string]: any } = {}
   const footList: { [key: string]: any }[] = []
-  const rowList = datas
+  // const rowList = datas
+
   if (isHeader) {
     columns.forEach((column) => {
       colHead[column.id] = XEUtils.toString(original ? column.property : column.getTitle())
     })
   }
+
+  // 新增部分
+  const rowList = datas.map(item => {
+    const rest: any = {}
+    columns.forEach((column) => {
+      rest[column.id] = getCellLabel(column, item[column.id])
+    })
+    return rest
+  })
+
   if (isFooter) {
     const { footerData } = $table.getTableData()
     const footers = footerFilterMethod ? footerData.filter(footerFilterMethod) : footerData
