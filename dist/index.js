@@ -1,6 +1,6 @@
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define("vxe-table-plugin-export-xlsx", ["exports", "xe-utils", "xlsx"], factory);
+    define("vxe-table-plugin-export-xlsx-xhx", ["exports", "xe-utils", "xlsx"], factory);
   } else if (typeof exports !== "undefined") {
     factory(exports, require("xe-utils"), require("xlsx"));
   } else {
@@ -19,56 +19,72 @@
   _exports["default"] = _exports.VXETablePluginExportXLSX = void 0;
   _xeUtils = _interopRequireDefault(_xeUtils);
   _xlsx = _interopRequireDefault(_xlsx);
-
   function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
   /* eslint-disable no-unused-vars */
 
   /* eslint-enable no-unused-vars */
   var _vxetable;
-
-  function getFooterCellValue($table, opts, rows, column) {
-    var cellValue = _xeUtils["default"].toString(rows[$table.$getColumnIndex(column)]);
-
+  function getCellLabel(column, cellValue) {
+    if (cellValue) {
+      switch (column.cellType) {
+        case 'string':
+          return _xeUtils["default"].toValueString(cellValue);
+        case 'number':
+          if (!isNaN(cellValue)) {
+            return Number(cellValue);
+          }
+          break;
+        default:
+          if (cellValue.length < 12 && !isNaN(cellValue)) {
+            return Number(cellValue);
+          }
+          break;
+      }
+    }
     return cellValue;
   }
-
+  function getFooterCellValue($table, opts, rows, column) {
+    var cellValue = _xeUtils["default"].toString(rows[$table.$getColumnIndex(column)]);
+    return cellValue;
+  }
   function toBuffer(wbout) {
     var buf = new ArrayBuffer(wbout.length);
     var view = new Uint8Array(buf);
-
     for (var index = 0; index !== wbout.length; ++index) {
       view[index] = wbout.charCodeAt(index) & 0xFF;
     }
-
     return buf;
   }
-
   function exportXLSX(params) {
     var $table = params.$table,
-        options = params.options,
-        columns = params.columns,
-        datas = params.datas;
+      options = params.options,
+      columns = params.columns,
+      datas = params.datas;
     var sheetName = options.sheetName,
-        isHeader = options.isHeader,
-        isFooter = options.isFooter,
-        original = options.original,
-        message = options.message,
-        footerFilterMethod = options.footerFilterMethod;
+      isHeader = options.isHeader,
+      isFooter = options.isFooter,
+      original = options.original,
+      message = options.message,
+      footerFilterMethod = options.footerFilterMethod;
     var colHead = {};
     var footList = [];
-    var rowList = datas;
-
+    // const rowList = datas
     if (isHeader) {
       columns.forEach(function (column) {
         colHead[column.id] = _xeUtils["default"].toString(original ? column.property : column.getTitle());
       });
     }
-
+    // 新增部分
+    var rowList = datas.map(function (item) {
+      var rest = {};
+      columns.forEach(function (column) {
+        rest[column.id] = getCellLabel(column, item[column.id]);
+      });
+      return rest;
+    });
     if (isFooter) {
       var _$table$getTableData = $table.getTableData(),
-          footerData = _$table$getTableData.footerData;
-
+        footerData = _$table$getTableData.footerData;
       var footers = footerFilterMethod ? footerData.filter(footerFilterMethod) : footerData;
       footers.forEach(function (rows) {
         var item = {};
@@ -78,28 +94,22 @@
         footList.push(item);
       });
     }
-
     var book = _xlsx["default"].utils.book_new();
-
     var sheet = _xlsx["default"].utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), {
       skipHeader: true
-    }); // 转换数据
-
-
+    });
+    // 转换数据
     _xlsx["default"].utils.book_append_sheet(book, sheet, sheetName);
-
     var wbout = _xlsx["default"].write(book, {
       bookType: 'xlsx',
       bookSST: false,
       type: 'binary'
     });
-
     var blob = new Blob([toBuffer(wbout)], {
       type: 'application/octet-stream'
-    }); // 保存导出
-
+    });
+    // 保存导出
     downloadFile(blob, options);
-
     if (message !== false) {
       _vxetable.modal.message({
         message: _vxetable.t('vxe.table.expSuccess'),
@@ -107,12 +117,10 @@
       });
     }
   }
-
   function downloadFile(blob, options) {
     if (window.Blob) {
       var filename = options.filename,
-          type = options.type;
-
+        type = options.type;
       if (navigator.msSaveBlob) {
         navigator.msSaveBlob(blob, "".concat(filename, ".").concat(type));
       } else {
@@ -128,16 +136,13 @@
       console.error(_vxetable.t('vxe.error.notExp'));
     }
   }
-
   function replaceDoubleQuotation(val) {
     return val.replace(/^"/, '').replace(/"$/, '');
   }
-
   function parseCsv(columns, content) {
     var list = content.split('\n');
     var fields = [];
     var rows = [];
-
     if (list.length) {
       var rList = list.slice(1);
       list[0].split(',').map(replaceDoubleQuotation);
@@ -153,18 +158,15 @@
         }
       });
     }
-
     return {
       fields: fields,
       rows: rows
     };
   }
-
   function checkImportData(columns, fields, rows) {
     var tableFields = [];
     columns.forEach(function (column) {
       var field = column.property;
-
       if (field) {
         tableFields.push(field);
       }
@@ -173,28 +175,22 @@
       return fields.includes(field);
     });
   }
-
   function importXLSX(params) {
     var columns = params.columns,
-        options = params.options,
-        file = params.file;
+      options = params.options,
+      file = params.file;
     var $table = params.$table;
     var _importResolve = $table._importResolve;
     var fileReader = new FileReader();
-
     fileReader.onload = function (e) {
       var workbook = _xlsx["default"].read(e.target.result, {
         type: 'binary'
       });
-
       var csvData = _xlsx["default"].utils.sheet_to_csv(workbook.Sheets.Sheet1);
-
       var _parseCsv = parseCsv(columns, csvData),
-          fields = _parseCsv.fields,
-          rows = _parseCsv.rows;
-
+        fields = _parseCsv.fields,
+        rows = _parseCsv.rows;
       var status = checkImportData(columns, fields, rows);
-
       if (status) {
         $table.createData(rows).then(function (data) {
           if (options.mode === 'append') {
@@ -203,7 +199,6 @@
             $table.reloadData(data);
           }
         });
-
         if (options.message !== false) {
           _vxetable.modal.message({
             message: _xeUtils["default"].template(_vxetable.t('vxe.table.impSuccess'), [rows.length]),
@@ -216,24 +211,19 @@
           status: 'error'
         });
       }
-
       if (_importResolve) {
         _importResolve(status);
-
         $table._importResolve = null;
       }
     };
-
     fileReader.readAsBinaryString(file);
   }
-
   function handleImportEvent(params) {
     if (params.options.type === 'xlsx') {
       importXLSX(params);
       return false;
     }
   }
-
   function handleExportEvent(params) {
     if (params.options.type === 'xlsx') {
       exportXLSX(params);
@@ -243,8 +233,6 @@
   /**
    * 基于 vxe-table 表格的增强插件，支持导出 xlsx 格式
    */
-
-
   var VXETablePluginExportXLSX = {
     install: function install(xtable) {
       var interceptor = xtable.interceptor;
@@ -259,11 +247,9 @@
     }
   };
   _exports.VXETablePluginExportXLSX = VXETablePluginExportXLSX;
-
   if (typeof window !== 'undefined' && window.VXETable) {
     window.VXETable.use(VXETablePluginExportXLSX);
   }
-
   var _default = VXETablePluginExportXLSX;
   _exports["default"] = _default;
 });
