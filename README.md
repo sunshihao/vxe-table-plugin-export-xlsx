@@ -5,7 +5,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/vxe-table-plugin-export-xlsx.svg?style=flat-square)](http://npm-stat.com/charts.html?package=vxe-table-plugin-export-xlsx)
 [![npm license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
 
--- 新增 兼容IE11
+-- 新增 版本 1.0.9 兼容IE11 
 
 基于 [vxe-table](https://www.npmjs.com/package/vxe-table) 的表格插件，支持导出 xlsx 格式，基于 [exceljs](https://github.com/exceljs/exceljs) 实现
 
