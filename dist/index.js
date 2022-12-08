@@ -28,7 +28,7 @@
     if (cellValue) {
       switch (column.cellType) {
         case 'string':
-          return _xeUtils["default"].toValueString(cellValue);
+          return _xeUtils["default"].toString(cellValue);
         case 'number':
           if (!isNaN(cellValue)) {
             return Number(cellValue);

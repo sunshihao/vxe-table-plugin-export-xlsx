@@ -13,12 +13,11 @@ import XLSX from 'xlsx'
 
 let _vxetable: typeof VXETable
 
-
 function getCellLabel (column: ColumnConfig, cellValue: any) {
   if (cellValue) {
     switch (column.cellType) {
       case 'string':
-        return XEUtils.toValueString(cellValue)
+        return XEUtils.toString(cellValue)
       case 'number':
         if (!isNaN(cellValue)) {
           return Number(cellValue)
@@ -33,8 +32,6 @@ function getCellLabel (column: ColumnConfig, cellValue: any) {
   }
   return cellValue
 }
-
-
 
 function getFooterCellValue ($table: Table, opts: ExportOptons, rows: any[], column: ColumnConfig) {
   var cellValue = XEUtils.toString(rows[$table.$getColumnIndex(column)])
