@@ -5,13 +5,14 @@
 
 ## introductions
 
-基于 vxe-table-plugin-export-xlsx 1.3.4版本进行工程适应性修改
+警告: 基于vxe-table-plugin-export-xlsx 1.3.4 版本进行老工程适应性修改,请勿使用!
 注意: 隶属于旧项目使用, 新工程请参照 vxe-table-plugin-export-xlsx
 
 ## history
 
-版本 1.0.9 对IE11进行适配
-版本 1.0.2 不进行多余导出
+版本 1.0.11 完善单元文本cellType的支持自定义 string 或 number
+版本 1.0.9 修复IE11报错
+版本 1.0.2 修复未定义数据项导出
 
 ## Installing
 ```shell
