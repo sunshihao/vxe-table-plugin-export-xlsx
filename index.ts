@@ -8,7 +8,8 @@ import {
   ColumnConfig,
   ExportOptons
 } from 'vxe-table/lib/vxe-table'
-import XLSX from 'xlsx'
+// import XLSX from 'xlsx'
+import * as XLSX from 'xlsx-js-style'
 /* eslint-enable no-unused-vars */
 
 let _vxetable: typeof VXETable
@@ -80,6 +81,47 @@ function exportXLSX (params: InterceptorExportParams) {
   }
   const book = XLSX.utils.book_new()
   const sheet = XLSX.utils.json_to_sheet((isHeader ? [colHead] : []).concat(rowList).concat(footList), { skipHeader: true })
+
+  Object.keys(sheet).forEach(key => {
+    // 非!开头的属性都是单元格
+    if (!key.startsWith('!')) {
+      if (key.replace(/[^\d]/g, '') === '1') {
+        sheet[key].v = sheet[key].v.padEnd(10, ' ') // 手动补位
+        sheet[key].s = {
+          font: {
+            sz: '10',
+            bold: true
+          },
+          fill: {
+            fgColor: { rgb: 'F2F2F2' }
+          },
+          border: {
+            top: { style: 'thin' },
+            right: { style: 'thin' },
+            bottom: { style: 'thin' },
+            left: { style: 'thin' }
+          }
+        }
+      } else {
+        sheet[key].s = {
+          font: {
+            sz: '10'
+          },
+          alignment: {
+            wrapText: true,
+            vertical: 'top'
+          },
+          border: {
+            top: { style: 'thin' },
+            right: { style: 'thin' },
+            bottom: { style: 'thin' },
+            left: { style: 'thin' }
+          }
+        }
+      }
+    }
+  })
+
   // 转换数据
   XLSX.utils.book_append_sheet(book, sheet, sheetName)
   const wbout = XLSX.write(book, { bookType: 'xlsx', bookSST: false, type: 'binary' })

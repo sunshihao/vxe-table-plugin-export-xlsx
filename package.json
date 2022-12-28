@@ -1,6 +1,6 @@
 {
   "name": "vxe-table-plugin-export-xlsx-xhx",
-  "version": "1.0.11",
+  "version": "1.0.17",
   "description": "基于 vxe-table 表格的增强插件，支持导出 xlsx 格式",
   "scripts": {
     "lib": "gulp build"
@@ -72,5 +72,8 @@
   "bugs": {
     "url": "https://github.com/xuliangzhan/vxe-table-plugin-export-xlsx/issues"
   },
-  "homepage": "https://github.com/xuliangzhan/vxe-table-plugin-export-xlsx#readme"
+  "homepage": "https://github.com/xuliangzhan/vxe-table-plugin-export-xlsx#readme",
+  "dependencies": {
+    "xlsx-js-style": "^1.2.0"
+  }
 }
